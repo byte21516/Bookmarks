@@ -1,7 +1,7 @@
 
 # Installation via docker / docker-compose (recommended):
 
-- Image: https://hub.docker.com/r/byte21516/bookmarks
+- Image source: https://hub.docker.com/r/byte21516/bookmarks
 
 ```
 services:
@@ -55,3 +55,8 @@ $ node server.js
 ## Performing proper Backups:
 
 Backups are pretty easy: Just backup "db.sqlite".
+
+## Images:
+
+![](https://bytesofprogress.net/blog/posts/2025/bookmarks/1.png)
+![](https://bytesofprogress.net/blog/posts/2025/bookmarks/2.png)
