@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title><%= category.name %> - Bookmarks</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="stylesheet" href="/all.min.css">
+  <style>
+    body { font-family:'Segoe UI', sans-serif; background:#121212; color:#e0e0e0; margin:0; padding:20px; }
+    h1,h2 { text-align:center; color:#fff; }
+    .section { max-width:900px; margin:0 auto 30px; }
+    .card { background:#1e1e1e; border-radius:8px; padding:20px; margin-bottom:20px; box-shadow:0 2px 6px rgba(0,0,0,0.5);}
+    h2.card-title { display:flex; align-items:center; gap:8px; margin-top:0; margin-bottom:15px; font-size:20px; border-bottom:1px solid #333; padding-bottom:5px; }
+    ul { list-style:none; padding-left:0; margin:0; }
+    li { margin-bottom:6px; display:flex; align-items:center; justify-content:space-between; padding:6px 10px; border:1px solid #333; border-radius:4px; background:#1e1e1e; }
+    a { color:#90caf9; text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    .actions { display:flex; gap:8px; }
+    .action-btn { background:none; border:none; color:#ef5350; cursor:pointer; font-size:14px; }
+    .action-btn:hover { color:#fff; }
+    .modal-bg { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1000; }
+    .modal { background:#1e1e1e; padding:20px; border-radius:8px; text-align:center; max-width:300px; width:100%; position:relative; }
+    .modal button { margin:5px; cursor:pointer; }
+    input { padding:6px; border-radius:4px; border:1px solid #333; background:#1e1e1e; color:#fff; outline:none; }
+    button.submit-btn { padding:6px 12px; border:none; border-radius:4px; background:#1e88e5; color:#fff; cursor:pointer; }
+    button.submit-btn:hover { background:#1565c0; }
+    button:hover {
+      cursor: pointer;
+    }
+    .delete-btn {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: #ef5350;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+    }
+
+    .delete-btn:hover {
+        background: #ef5350;
+        color: #fff;
+    }
+    #cancelDelete {
+      display: inline-block;
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(#6e6e6e, #4a4a4a); /* grauer Verlauf */
+      border: 0;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+      cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms;
+    }
+    #confirmDelete {
+      display: inline-block;
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(#ff4d4f, #d9363e);
+      border: 0;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(217, 57, 62, 0.25);
+      cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms;
+    }
+    h1,h2 { text-align:center; color:#fff; }
+    a { color:#90caf9; text-decoration:none; }
+    a:hover { text-decoration:underline; }
+  </style>
+</head>
+<body>
+
+  <center>
+      <h1>
+        <a class="text-link" href="/">Bookmarks</a>
+      </h1>
+    <h2><%= category.name %></h2>
+  </center>
+
+  <div class="section" style="text-align:center; margin-bottom:20px;">
+    <% if (parentId) { %>
+      <a href="/category/<%= parentId %>" style="color:#90caf9;">🡸 Back</a>
+    <% } else { %>
+      <a href="/" style="color:#90caf9;">🡸 Back</a>
+    <% } %>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="section">
+    <form action="/search" method="GET" style="display:flex; justify-content:center; margin-bottom:20px;">
+      <input type="text" name="q" placeholder="Search categories or links..." value="<%= search || '' %>" style="padding:8px 12px; width:300px; border-radius:6px 0 0 6px; border:1px solid #333; background:#1e1e1e; color:#fff; outline:none;">
+      <button type="submit" style="padding:8px 12px; border-radius:0 6px 6px 0; border:1px solid #333; border-left:none; background:#1e88e5; color:#fff;">Search</button>
+    </form>
+  </div>
+
+  <!-- Subcategories -->
+  <div class="section card">
+    <h2 class="card-title"><i class="fa-solid fa-folder"></i> Subcategories</h2>
+
+    <form action="/category" method="POST" style="display:flex; justify-content:left; margin-bottom: 8px;">
+      <input type="hidden" name="parent_id" value="<%= category.id %>">
+      <input type="text" name="name" placeholder="New subcategory..." value="" style="padding:8px 12px; width:300px; border-radius:6px 0 0 6px; border:1px solid #333; background:#1e1e1e; color:#fff; outline:none;">
+      <button type="submit" class="submit-btn" style="padding:8px 12px; border-radius:0 6px 6px 0; border:1px solid #333; border-left:none; background:#1e88e5; color:#fff;">Add</button>
+    </form>
+
+    <% if(subcategories.length){ %>
+      <ul>
+        <% subcategories.forEach(sub => { %>
+          <li>
+            <a href="/category/<%= sub.id %>" style="color:#90caf9; text-decoration:none;">
+              <i class="fa-solid fa-folder"></i> <%= sub.name %>
+            </a>
+            <span class="actions">
+              <form action="/category/<%= sub.id %>/delete" method="POST" style="display:inline;" onsubmit="event.preventDefault(); showDeleteModal(this);">
+                <button type="submit" class="action-btn" title="Delete"><i class="fa-solid fa-trash"></i></button>
+              </form>
+            </span>
+          </li>
+        <% }) %>
+      </ul>
+    <% } else { %>
+      <p>No subcategories found.</p>
+    <% } %>
+  </div>
+
+  <!-- Links -->
+<div class="section card">
+  <h2 class="card-title"><i class="fa-solid fa-link"></i> Links</h2>
+
+  <!-- Add Link Form -->
+  <form action="/link" method="POST" style="display:flex; justify-content:left; margin-bottom:8px;">
+    <input type="hidden" name="category_id" value="<%= category.id %>">
+    <input type="url" name="url" placeholder="https://example.com" value="" style="padding:8px 12px; width:300px; border-radius:6px 0 0 6px; border:1px solid #333; background:#1e1e1e; color:#fff; outline:none;">
+    <button type="submit" style="padding:8px 12px; border-radius:0 6px 6px 0; border:1px solid #333; border-left:none; background:#1e88e5; color:#fff;">Add</button>
+  </form>
+
+  <% if(links.length){ %>
+    <ul style="list-style:none; padding-left:0;">
+      <% links.forEach(link => { %>
+        <li style="display:flex; align-items:center; justify-content:space-between; padding:4px 8px; border:1px solid #333; border-radius:4px; margin-bottom:6px; background:#1e1e1e;">
+          <div style="display:flex; align-items:center; gap:8px; overflow:hidden; width:550px;">
+            <% if(link.favicon){ %>
+              <div style="width:16px; height:16px; position:relative;">
+                <img src="<%= link.favicon %>" alt="favicon" style="width:16px; height:16px; display:block;"
+                  onerror="this.style.display='none'; this.parentElement.querySelector('i').style.display='block';">
+                <i class="fa-solid fa-link" style="position:absolute; top:0; left:0; width:16px; height:16px; display:none;"></i>
+              </div>
+            <% } else { %>
+            <i class="fa-solid fa-link" style="width:16px; height:16px;"></i>
+      <% } %>
+      <a href="/link/<%= link.id %>/go" target="_blank" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#90caf9;">
+        <%= link.title %>
+      </a>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span class="category-link">in <a href="/category/<%= link.category_id %>">Category</a></span>
+      <button class="delete-btn stats-btn" data-visits="<%= link.visits %>" data-created="<%= link.created_at %>" title="View stats">
+        <i class="fa-solid fa-chart-line"></i>
+      </button>
+      <form action="/link/<%= link.id %>/delete" method="POST" style="margin:0;" onsubmit="event.preventDefault(); showDeleteModal(this);">
+        <button type="submit" class="delete-btn" title="Delete"><i class="fa-solid fa-trash"></i></button>
+      </form>
+    </div>
+  </li>
+<% }) %>
+</ul>
+<% } else { %>
+<p class="empty">No links found.</p>
+<% } %>
+</div>
+
+  <!-- Delete Modal -->
+  <div class="modal-bg" id="deleteModal">
+    <div class="modal">
+      <p>Are you sure you want to delete this item?</p>
+      <button id="cancelDelete">Cancel</button>
+      <button id="confirmDelete">Delete</button>
+    </div>
+  </div>
+
+  <!-- Stats Modal -->
+  <div class="modal-bg" id="statsModal">
+    <div class="modal">
+      <h3>Link Stats</h3>
+      <p id="statsContent"></p>
+      <button id="closeStats" style="position:absolute; top:10px; right:10px; background:none; border:none; color:#fff; cursor:pointer;">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let deleteForm = null;
+    const deleteModal = document.getElementById('deleteModal');
+    const cancelBtn = document.getElementById('cancelDelete');
+    const confirmBtn = document.getElementById('confirmDelete');
+
+    function showDeleteModal(form){
+      deleteForm = form;
+      deleteModal.style.display = 'flex';
+    }
+
+    function hideDeleteModal(){
+      deleteForm = null;
+      deleteModal.style.display = 'none';
+    }
+
+    cancelBtn.addEventListener('click', hideDeleteModal);
+    confirmBtn.addEventListener('click', ()=>{ if(deleteForm) deleteForm.submit(); });
+    deleteModal.addEventListener('click', (e)=>{ if(e.target===deleteModal) hideDeleteModal(); });
+    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') hideDeleteModal(); });
+
+    // Stats Modal
+    const statsModal = document.getElementById('statsModal');
+    const statsContent = document.getElementById('statsContent');
+    const closeStats = document.getElementById('closeStats');
+
+    document.querySelectorAll('.stats-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const visits = btn.dataset.visits || 0;
+        const created = btn.dataset.created || 'unknown';
+        statsContent.innerHTML = `Visits: ${visits}<br>Added: ${created}`;
+        statsModal.style.display = 'flex';
+      });
+    });
+
+    closeStats.addEventListener('click', ()=> statsModal.style.display='none');
+    statsModal.addEventListener('click',(e)=>{ if(e.target===statsModal) statsModal.style.display='none'; });
+  </script>
+
+</body>
+</html>

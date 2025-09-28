@@ -1,0 +1,12 @@
+
+services:
+  bookmarks:
+    image: byte21516/bookmarks:latest
+    container_name: bookmarks
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./bookmarks-data:/app/data
+    environment:
+      NODE_ENV: production
+    restart: unless-stopped
