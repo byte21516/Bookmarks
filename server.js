@@ -8,7 +8,6 @@ const fetch = (...args) => import("node-fetch").then(({ default: fetch }) => fet
 const app = express();
 const db = new sqlite3.Database(path.join(__dirname, "data", "db.sqlite"));
 
-
 // Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
@@ -43,7 +42,10 @@ db.serialize(() => {
 // --- Fetch metadata ---
 async function fetchMeta(url) {
   try {
-    const res = await fetch(url, { redirect: "follow" });
+    const res = await fetch(url, {
+      redirect: "follow",
+      headers: { "User-Agent": "Mozilla/5.0" }
+    });
     const html = await res.text();
     const $ = cheerio.load(html);
 
@@ -69,7 +71,7 @@ async function fetchMeta(url) {
 
 // --- ROUTES ---
 
-// Home: Root categories
+// Home
 app.get("/", (req, res) => {
   db.all("SELECT * FROM categories WHERE parent_id IS NULL", (err, categories) => {
     if (err) {
@@ -97,7 +99,6 @@ app.get("/search", (req, res) => {
           console.error("DB Error (links):", err2);
           return res.status(500).send("DB Error (links)");
         }
-
         res.render("search", { categories, links, search: q });
       }
     );
