@@ -1,7 +1,5 @@
-# Basis-Image
-FROM node:20-alpine
+FROM node:20
 
-# Arbeitsverzeichnis im Container
 WORKDIR /app
 
 COPY package*.json ./
